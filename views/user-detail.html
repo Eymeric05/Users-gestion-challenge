@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détails de l'Utilisateur</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Détails de l'Utilisateur</h1>
+            <p>Informations détaillées de l'utilisateur sélectionné</p>
+        </div>
+        
+        <div class="nav-buttons">
+            <a href="/" class="btn">Accueil</a>
+            <a href="/formulaire" class="btn btn-secondary">Ajouter un utilisateur</a>
+        </div>
+        
+        <div class="user-detail-section">
+            <div class="loading" id="loading">
+                Chargement des informations...
+            </div>
+            
+            <div class="success-message" id="successMessage">
+                Utilisateur mis à jour avec succès !
+            </div>
+            
+            <div class="error-message" id="errorMessage">
+                Erreur lors du chargement des informations
+            </div>
+            
+            <div class="user-info" id="userInfo" style="display: none;">
+                <div class="user-name" id="userName"></div>
+                
+                <div class="user-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Email</div>
+                        <div class="detail-value" id="userEmail"></div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">Rôle</div>
+                        <div class="user-role" id="userRole"></div>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">ID</div>
+                        <div class="detail-value" id="userId"></div>
+                    </div>
+                </div>
+                
+                <div class="actions-section">
+                    <button class="btn btn-edit" onclick="showEditForm()">
+                        Modifier l'utilisateur
+                    </button>
+                    <button class="btn btn-delete" onclick="deleteUser()">
+                        Supprimer l'utilisateur
+                    </button>
+                </div>
+            </div>
+            
+            <div class="edit-form" id="editForm">
+                <h3 style="text-align: center; margin-bottom: 20px; color: #1976d2;">
+                    Modifier l'utilisateur
+                </h3>
+                
+                <div class="form-group">
+                    <label for="editNom" class="form-label">Nom</label>
+                    <input type="text" id="editNom" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editEmail" class="form-label">Email</label>
+                    <input type="email" id="editEmail" class="form-input" required>
+                </div>
+                
+                <div class="form-buttons">
+                    <button class="btn btn-edit btn-small" onclick="saveChanges()">
+                        Sauvegarder
+                    </button>
+                    <button class="btn btn-cancel btn-small" onclick="hideEditForm()">
+                        Annuler
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        
+        // Récupérer l'ID de l'utilisateur depuis l'URL
+        function getUserIdFromUrl() {
+            const pathParts = window.location.pathname.split('/');
+            return pathParts[pathParts.length - 1];
+        }
+        
+        // Charger les informations de l'utilisateur
+        async function loadUserDetails() {
+            const userId = getUserIdFromUrl();
+            
+            try {
+                const response = await fetch(`/api/users/${userId}`);
+                
+                if (response.ok) {
+                    currentUser = await response.json();
+                    displayUserInfo(currentUser);
+                } else {
+                    showError('Utilisateur non trouvé');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showError('Erreur lors du chargement des informations');
+            }
+        }
+        
+        // Afficher les informations de l'utilisateur
+        function displayUserInfo(user) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('userInfo').style.display = 'block';
+            
+            document.getElementById('userName').textContent = user.nom;
+            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('userId').textContent = user.id;
+            
+            const roleElement = document.getElementById('userRole');
+            roleElement.textContent = user.role;
+            roleElement.className = `user-role role-${user.role.toLowerCase()}`;
+        }
+        
+        // Afficher une erreur
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorMessage').style.display = 'block';
+        }
+        
+        // Afficher le formulaire de modification
+        function showEditForm() {
+            document.getElementById('editForm').style.display = 'block';
+            document.getElementById('editNom').value = currentUser.nom;
+            document.getElementById('editEmail').value = currentUser.email;
+        }
+        
+        // Masquer le formulaire de modification
+        function hideEditForm() {
+            document.getElementById('editForm').style.display = 'none';
+        }
+        
+        // Sauvegarder les modifications
+        async function saveChanges() {
+            const newNom = document.getElementById('editNom').value.trim();
+            const newEmail = document.getElementById('editEmail').value.trim();
+            
+            if (!newNom || !newEmail) {
+                alert('Veuillez remplir tous les champs');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/users/${currentUser.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nom: newNom,
+                        email: newEmail
+                    })
+                });
+                
+                if (response.ok) {
+                    currentUser.nom = newNom;
+                    currentUser.email = newEmail;
+                    
+                    displayUserInfo(currentUser);
+                    hideEditForm();
+                    
+                    document.getElementById('successMessage').style.display = 'block';
+                    setTimeout(() => {
+                        document.getElementById('successMessage').style.display = 'none';
+                    }, 3000);
+                } else {
+                    alert('Erreur lors de la mise à jour');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Erreur lors de la mise à jour');
+            }
+        }
+        
+        // Supprimer l'utilisateur
+        async function deleteUser() {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/users/${currentUser.id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    alert('Utilisateur supprimé avec succès !');
+                    window.location.href = '/';
+                } else {
+                    alert('Erreur lors de la suppression');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Erreur lors de la suppression');
+            }
+        }
+        
+        // Charger les détails au chargement de la page
+        document.addEventListener('DOMContentLoaded', loadUserDetails);
+    </script>
+</body>
+</html>

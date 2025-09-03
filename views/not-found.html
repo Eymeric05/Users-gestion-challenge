@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Non Trouvée - 404</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="error-header">
+            <div class="error-code">404</div>
+            <h1 class="error-title">Page Non Trouvée</h1>
+            <p class="error-description">Oups ! Il semble que cette page n'existe pas</p>
+        </div>
+        
+        <div class="error-content">
+            <div class="fun-illustration">🤔</div>
+            
+            <p class="error-message">
+                La page que vous recherchez n'existe pas ou a été déplacée. 
+                Ne vous inquiétez pas, cela arrive même aux meilleurs !
+            </p>
+            
+            <div class="error-suggestions">
+                <h3>Que pouvez-vous faire ?</h3>
+                <ul>
+                    <li>Vérifiez l'URL dans la barre d'adresse</li>
+                    <li>Utilisez les boutons de navigation ci-dessous</li>
+                    <li>Retournez à la page d'accueil</li>
+                    <li>Contactez l'administrateur si le problème persiste</li>
+                </ul>
+            </div>
+            
+            <div class="navigation-buttons">
+                <a href="/" class="btn btn-home">Retour à l'Accueil</a>
+                <a href="/formulaire" class="btn btn-secondary">Ajouter un Utilisateur</a>
+                <button onclick="history.back()" class="btn">Page Précédente</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Animation d'entrée simple
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.querySelector('.container');
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(30px)';
+            
+            setTimeout(() => {
+                container.style.transition = 'all 0.6s ease';
+                container.style.opacity = '1';
+                container.style.transform = 'translateY(0)';
+            }, 100);
+        });
+        
+        // Animation de l'émoji
+        const emoji = document.querySelector('.fun-illustration');
+        setInterval(() => {
+            emoji.style.transform = 'rotate(5deg)';
+            setTimeout(() => {
+                emoji.style.transform = 'rotate(-5deg)';
+            }, 200);
+        }, 3000);
+    </script>
+</body>
+</html>
